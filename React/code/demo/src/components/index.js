@@ -6,6 +6,7 @@ import EventDemo from './EventDemo'
 import FormDemo from './FormDemo'
 import PropsDemo from './PropsDemo'
 import StateDemo from './StateDemo'
+import ReduxApp from './ReduxApp'
 /*
 creator: cathy
 created time: 2020-09-21 07:09:22 星期一
@@ -21,7 +22,8 @@ export default class BaseDemo extends PureComponent {
         <EventDemo />
         <FormDemo />
         <PropsDemo /> */}
-        <StateDemo/>
+        {/* <StateDemo/> */}
+        <ReduxApp />
       </div>
     )
   }
