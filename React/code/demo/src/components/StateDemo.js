@@ -21,6 +21,21 @@ export default class StateDemo extends PureComponent {
     }
   }
 
+  componentDidMount () {
+    this.setState({ count: this.state.count + 1 })
+    console.log(this.state.count) // 0
+    this.setState({ count: this.state.count + 1 })
+    console.log(this.state.count) // 0
+    setTimeout(() => {
+      this.setState({ count: this.state.count + 1 })
+      console.log(this.state.count) // 2
+    }, 0)
+    setTimeout(() => {
+      this.setState({ count: this.state.count + 1 })
+      console.log(this.state.count) // 3
+    }, 0)
+  }
+
   render () {
     return (
       <div>

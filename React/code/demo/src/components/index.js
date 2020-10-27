@@ -22,8 +22,8 @@ export default class BaseDemo extends PureComponent {
         <EventDemo />
         <FormDemo />
         <PropsDemo /> */}
-        {/* <StateDemo/> */}
-        <ReduxApp />
+        <StateDemo/>
+        {/* <ReduxApp /> */}
       </div>
     )
   }
