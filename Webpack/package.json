@@ -4,9 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev:build": "webpack --config build-base-conf/webpack.dev.js",
-    "dev": "webpack serve --config build-base-conf/webpack.dev.js",
-    "build": "webpack --config build-base-conf/webpack.prod.js"
+    "dev:build": "webpack --config build-multi-entry/webpack.dev.js",
+    "dev": "webpack serve --config build-multi-entry/webpack.dev.js",
+    "build": "webpack --config build-multi-entry/webpack.prod.js"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
@@ -19,8 +19,11 @@
     "html-webpack-plugin": "^4.5.0",
     "less": "^3.12.2",
     "less-loader": "^7.0.2",
+    "mini-css-extract-plugin": "^1.2.1",
+    "optimize-css-assets-webpack-plugin": "^5.0.4",
     "postcss-loader": "^4.0.4",
     "style-loader": "^2.0.0",
+    "terser-webpack-plugin": "^5.0.3",
     "url-loader": "^4.1.1",
     "webpack": "^5.3.0",
     "webpack-cli": "^4.1.0",
