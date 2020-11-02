@@ -166,7 +166,6 @@ plugins: [
 ### 抽离压缩CSS
 本地开发时可以将CSS直接以style的形式注入到dom上，但是生产模式下，必须将CSS抽离成单独的文件并进行打包压缩。
 
-### 抽离公共代码
 开发模式下，依旧这么处理样式文件：
 ```js
 {
@@ -224,6 +223,60 @@ optimization: {
   ]
 }
 ```
+
+### 抽离公共代码
+```js
+// // 引入第三方模块
+import _ from 'lodash'
+console.log(_.each)
+```
+这种大体积的第三方模块我们希望可以单独打包，因为根据contenthash生成文件名，每次改动一点代码，hash就变了，而整个代码中是包含lodash的，但lodash并没有变，却也重新打包了。
+我们希望lodash可以单独打包，它不会变化，命中缓存加载就很快。
+
+生产模式使用 splitChunk 抽离chunk
+```js
+optimization: {
+  // 分割代码块
+  splitChunks: {
+    chunks: 'all', // 一般情况下写all, all 全部 chunk, async 异步 chunk, 只对异步导入的文件处理，initial 入口 chunk，对于异步导入的文件不处理
+    // 缓存分组
+    cacheGroups: {
+      // 第三方模块
+      vendor: {
+        name: 'vender', // chunk 名称
+        priority: 1, // 权限更高，优先抽离，重要！
+        test: /node_modules/,
+        minSize: 0, // 大小限制，小于这个值就不单独打包
+        minChunks: 1, // 最少复用过几次 1 表示只要用到就单独打包
+      },
+      common: {
+        name: 'common', // chunk 名称
+        priority: 0,
+        minSize: 0, // 公共模块大小限制
+        minChunks: 2, // 公共模块最少复用过几次 引用2次或以上就单独打包
+      }
+    }
+  }
+}
+```
+公共webpack配置中模板引用chunk情况：
+```js
+plugins: [
+  new HtmlWebpackPlugin({
+    template: path.join(srcPath, 'index.html'),
+    filename: 'index.html',
+    // chunks 表示该页面要引入哪些 chunk （即上面的index 和 other）
+    chunks: ['index', 'vendor', 'common'] // 只引入 index、vendor、common
+  }),
+  new HtmlWebpackPlugin({
+    template: path.join(srcPath, 'other.html'),
+    filename: 'other.html',
+    // chunks 表示该页面要引入哪些 chunk （即上面的index 和 other）
+    chunks: ['other', 'common'] // 只引入 index、common
+  }),
+]
+```
+
 ### 懒加载
 
 ### 处理React和Vue

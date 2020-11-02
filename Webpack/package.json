@@ -4,9 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev:build": "webpack --config build-multi-entry/webpack.dev.js",
-    "dev": "webpack serve --config build-multi-entry/webpack.dev.js",
-    "build": "webpack --config build-multi-entry/webpack.prod.js"
+    "dev:build": "webpack --config build-splitChunks/webpack.dev.js",
+    "dev": "webpack serve --config build-splitChunks/webpack.dev.js",
+    "build": "webpack --config build-splitChunks/webpack.prod.js"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
