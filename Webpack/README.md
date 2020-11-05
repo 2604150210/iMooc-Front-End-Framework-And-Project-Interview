@@ -320,7 +320,9 @@ yarn add vue-loader
 ---
 
 ## 三、Webpack性能优化
+
 ### 优化打包构建速度 - 开发体验和效率
+
 #### 优化babel-loader
 ```js
 {
@@ -359,7 +361,7 @@ console.log('locale',moment.locale())
 console.log('date', moment().format('ll')) // 2020年11月4日
 ```
 
-### noParse 避免重复打包
+#### noParse 避免重复打包
 避免重复打包，像 min.js 基本上都是打包过了的，不需要对它进行重复打包
 ```js
 module: {
@@ -368,12 +370,13 @@ module: {
 ````
 
 **IgnorePlugin 和 noParse 的区别**
-
 + IgnorePlugin 直接不引入，代码中没有
 + noParse 引入，但不对它分析、构建和打包
 + IgnorePlugin 还优化了产出体积
 
-### happyPack 多进程打包
+
+#### happyPack 多进程打包
+
 + JS 单线程，开启多进程打包
 + 提高构建速度（特别是多核CPU）
 ```sh
@@ -403,7 +406,7 @@ new HappyPack({
 })
 ```
 
-### ParallelUglifyPlugin 多进程压缩 JS
+#### ParallelUglifyPlugin 多进程压缩 JS
 + webpack 内置Uglify 工具压缩 JS
 + JS 单线程，开启多进程压缩更快
 + 和 HappyPack 同理
@@ -441,17 +444,167 @@ new ParallelUglifyPlugin({
 + 项目较大，打包较慢，开启多进程能提高速度
 + 项目较小，打包很快，开启多进程会降低速度（进程开销）
 
-+ 自动刷新
-+ 热更新
-+ DllPlugin
+#### 自动刷新
+watch监听的方式现在几乎用不上了，因为起来了webpack-dev-server会就会自动刷新。
+```js
+module.export = {
+  watch: true, // 开启监听，默认为false
+  // 注意，开启监听之后，webpack-dev-server会自动开启刷新浏览器
+
+  // 监听配置
+  watchOptions: {
+    ignored: /node_modules/, // 忽略哪些
+    // 监听到变化发生后会等300ms再去执行动作，防止文件更新太快导致重新编译频率太高
+    aggregateTimeout: 300, // 默认为300ms
+    // 判断文件是否发生变化是通过不停地去询问同指定文件有没有变化实现的
+    poll: 1000 // 默认每隔1000毫秒询问一次
+  }
+}
+```
+#### 热更新
++ 自动刷新：整个网页全部刷新，速度较慢
++ 自动刷新：整个网页全部刷新，状态会丢失
++ 热更新：新代码生效，网页不刷新，状态不丢失
+
+```js
+const HotModuleReplacementPlugin = require('webpack/lib/HotModuleReplacementPlugin')
+
+module.exports = {
+  entry: {
+    // index: path.join(srcPath, 'index.js'),
+    index: [
+      'webpack-dev-server/client?http://localhost:9000/',
+      'webpack/hot/dev-server',
+      path.join(srcPath, 'index.js')
+    ],
+    other: path.join(srcPath, 'other.js'),
+  },
+
+  plugins: [
+    new HotModuleReplacementPlugin()
+  ],
+
+  devServer: {
+    hot: true
+  }
+}
+```
+样式文件可以自动热更新，脚本文件需要开发者注册需要热更新的模块，不在热更新注册范围内的模块发生改变，会触发自动刷新
+```js
+// 开启热更新之后的代码逻辑，注册哪些模块需要监听
+if (module.hot) {
+  module.hot.accept(['./math'], () => {
+    const sumRes = sum(10, 20)
+    console.log('sumRes in hot', sumRes)
+  })
+}
+```
+
+#### DllPlugin 动态链接库插件
+前端框架如 Vue React，体积大，构建慢，但是较稳定，不常升级版本，同一个版本只构建一次即可，不用每次都重新构建
++ webpack已内置DLLPlugin支持
++ DLLPlugin - 打包出dll文件
++ DLLReferencePlugin - 使用dll文件
+
+```sh
+yarn add @babel/core @babel/preset-env @babel/preset-react babel-loader html-webpack-plugin webpack webpack-cli webpack-dev-server webpack-merge -D
+```
+```json
+"scripts": {
+  "dev": "webpack serve --config build/webpack.dev.js",
+  "dll": "webpack --config build/webpack.dll.js"
+}
+```
+webpack.dll.js，配置好后就可以运行`yarn dll`生成`react.dll.js`和`react.manifest.json`到`dist`文件夹中
+```js
+const path = require('path')
+const DllPlugin = require('webpack/lib/DllPlugin')
+const { srcPath, distPath } = require('./paths')
+
+module.exports = {
+  mode: 'development',
+  // JS 执行入口文件
+  entry: {
+    // 把 React 相关模块的放到一个单独的动态链接库
+    react: ['react', 'react-dom']
+  },
+  output: {
+    // 输出的动态链接库的文件名称，[name] 代表当前动态链接库的名称，
+    // 也就是 entry 中配置的 react 和 polyfill
+    filename: '[name].dll.js',
+    // 输出的文件都放到 dist 目录下
+    path: distPath,
+    // 存放动态链接库的全局变量名称，例如对应 react 来说就是 _dll_react
+    // 之所以在前面加上 _dll_ 是为了防止全局变量冲突
+    library: '_dll_[name]',
+  },
+  plugins: [
+    // 接入 DllPlugin
+    new DllPlugin({
+      // 动态链接库的全局变量名称，需要和 output.library 中保持一致
+      // 该字段的值也就是输出的 manifest.json 文件 中 name 字段的值
+      // 例如 react.manifest.json 中就有 "name": "_dll_react"
+      name: '_dll_[name]',
+      // 描述动态链接库的 manifest.json 文件输出时的文件名称
+      path: path.join(distPath, '[name].manifest.json'),
+    }),
+  ],
+}
+```
+webpack.dev.js中怎么使用dll
+```js
+// 第一，引入 DllReferencePlugin 
+const DllReferencePlugin = require('webpack/lib/DllReferencePlugin')
+
+module.exports = merge(webpackCommonConf, {
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        loader: ['babel-loader'], // 开启缓存
+        include: srcPath, // 明确范围
+        exclude: /node_modules/, // 第二，不要再转换 node_modules
+      },
+    ]
+  },
+  plugins: [
+    // 第三，告诉 webpack 使用了哪些动态链接库
+    new DllReferencePlugin({
+      // 描述 react 动态链接库的文件内容
+      manifest: require(path.join(distPath, 'react.manifest.json'))
+    })
+  ],
+})
+```
+执行`yarn dev`即可测试开发环境下使用dll
+
+#### 总结：webpack 优化构建速度（可用于生产环境）
+1. 优化 babel-loader
+2. IgnorePlugin
+3. noParse
+4. happyPack
+5. ParallelUglifyPlugin(必须用于生产环境，因为这是压缩代码的，开发环境没必要压缩代码)
+
+#### 总结：webpack 优化构建速度（不用于生产环境）
+1. 自动刷新
+2. 热更新
+3. DllPlugin
 
 ### 优化产出代码 - 产品性能
-+ 使用生产环境
+
+#### 性能优化的优点
++ 体积更小
++ 合理分包，不重复加载
++ 速度更快，内存使用更少
+
+#### 如何性能优化
 + 小图片 base64 编码
 + bundle加hash
-+ 使用CDN
-+ 提取公共代码
 + 懒加载
++ 提取公共代码
++ IgnorePlugin
++ 使用CDN加速
++ 使用 production 模式
 + scope hosting
 
 ---

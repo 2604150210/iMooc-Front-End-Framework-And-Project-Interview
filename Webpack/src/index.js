@@ -1,7 +1,7 @@
 import './style/style1.css'
 import './style/style2.less'
 
-// import { sum } from './math'
+import { sum } from './math'
 
 
 // // 引入第三方模块
@@ -15,16 +15,16 @@ moment.locale('zh-cn') // 设置语言
 console.log('locale',moment.locale())
 console.log('date', moment().format('ll')) // 2020年11月4日
 
-// const sumRes = sum(30, 20)
-// console.log('sumRes', sumRes)
+const sumRes = sum(30, 20)
+console.log('sumRes', sumRes)
 
-// // 开启热更新之后的代码逻辑
-// if (module.hot) {
-//   module.hot.accept(['./math'], () => {
-//     const sumRes = sum(10, 20)
-//     console.log('sumRes in hot', sumRes)
-//   })
-// }
+// 开启热更新之后的代码逻辑，注册哪些模块需要监听
+if (module.hot) {
+  module.hot.accept(['./math'], () => {
+    const sumRes = sum(10, 20)
+    console.log('sumRes in hot', sumRes)
+  })
+}
 
 // console.log('window.ENV', ENV)
 

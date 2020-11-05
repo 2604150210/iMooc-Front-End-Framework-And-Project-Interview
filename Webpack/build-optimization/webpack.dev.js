@@ -2,6 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 const {merge} = require('webpack-merge')
 const webpackCommonConf = require('./webpack.common')
+const HotModuleReplacementPlugin = require('webpack/lib/HotModuleReplacementPlugin')
 const { srcPath, distPath } = require('./paths')
 
 /**
@@ -9,9 +10,14 @@ const { srcPath, distPath } = require('./paths')
  */
 module.exports = merge(webpackCommonConf, {
   mode: 'development',
-  output: {
-    path: distPath,
-    filename: 'bundle.js'
+  entry: {
+    // index: path.join(srcPath, 'index.js'),
+    index: [
+      'webpack-dev-server/client?http://localhost:9000/',
+      'webpack/hot/dev-server',
+      path.join(srcPath, 'index.js')
+    ],
+    other: path.join(srcPath, 'other.js'),
   },
   module: {
     rules: [
@@ -40,7 +46,8 @@ module.exports = merge(webpackCommonConf, {
     new webpack.DefinePlugin({
       // window.ENV = 'development'
       ENV: JSON.stringify('development')
-    })
+    }),
+    new HotModuleReplacementPlugin()
   ],
   // watch: true,
   devtool: 'eval-cheap-module-source-map',
@@ -50,6 +57,8 @@ module.exports = merge(webpackCommonConf, {
     contentBase: distPath, // 根目录
     open: true, // 自动打开浏览器
     compress: true, // 启动 gzip 压缩
+
+    hot: true,
 
     // 设置代理
     proxy: {

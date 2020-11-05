@@ -15,7 +15,15 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.join(srcPath, 'index.html'),
-      title: 'Webpack DEMO'
+      title: 'index Webpack DEMO',
+      filename: 'index.html',
+      chunks: ['index']
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(srcPath, 'other.html'),
+      title: 'other Webpack DEMO',
+      filename: 'other.html',
+      chunks: ['other']
     })
   ]
 }

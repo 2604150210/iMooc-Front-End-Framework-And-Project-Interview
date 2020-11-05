@@ -15,9 +15,14 @@ const { srcPath, distPath } = require('./paths')
  */
 module.exports = merge(webpackCommonConf, {
   mode: 'production',
+  entry: {
+    index: path.join(srcPath, 'index.js'),
+    other: path.join(srcPath, 'other.js'),
+  },
   output: {
     path: distPath,
-    filename: 'bundle.[contenthash:8].js', // 打包代码的文件名
+    filename: 'bundle.[contenthash:8].js', // 打包代码的文件名,
+    // publicPath: 'http://cdn.abc.com' // 修改所有静态文件的url前缀
   },
   module: {
     noParse: [/react\.min\.js$/],
