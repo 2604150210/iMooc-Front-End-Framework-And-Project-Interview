@@ -100,4 +100,87 @@ Node 是一个基于 Chrome V8 引擎的 JavaScript代码运行环境
 
 [MongoDB使用教程](MongoDB使用教程.md)
 
-## art-template
+## 模板引擎：art-template
+
+[art-template模板语法](art-template模板语法.md)
+
+在命令行工具中使用 npm install art-template 命令进行下载
+使用const template = require('art-template')引入模板引擎
+告诉模板引擎要拼接的数据和模板在哪 const html = template(‘模板路径’, 数据);
+使用模板语法告诉模板引擎，模板与数据应该如何进行拼接 
+```js
+ // 导入模板引擎模块
+ const template = require('art-template');
+ // 将特定模板与特定数据进行拼接
+ const html = template('./views/index.art',{
+    data: {
+        name: '张三',
+        age: 20
+    }
+ }); 
+
+```
+```html
+ <div>
+    <span>{{data.name}}</span>
+    <span>{{data.age}}</span>
+ </div>
+```
+
+## 第三方模块 router
+功能：实现路由
+使用步骤：
++ 获取路由对象
++ 调用路由对象提供的方法创建路由
++ 启用路由，使路由生效
+```js
+const http = require('http')
+const path = require('path')
+const finalhandler = require('finalhandler')
+const getRouter = require('router')
+const app = http.createServer()
+
+const router = getRouter()
+router.get('/', (req, res) => {
+  res.end('欢迎来到 首页')
+})
+router.get('/add', (req, res) => {
+  res.end('欢迎来到 add')
+})
+
+app.on('request', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/html; charset=utf-8'
+  })
+  router(req, res, finalhandler(req, res))
+})
+
+app.listen(3001, () => {
+  console.log('http://localhost:3001')
+})
+```
+
+## 第三方模块 serve-static
+功能：实现静态资源访问服务
+步骤：
++ 引入serve-static模块获取创建静态资源服务功能的方法
++ 调用方法创建静态资源服务并指定静态资源服务目录
++ 启用静态资源服务功能
+```js
+const http = require('http')
+const path = require('path')
+const serveStatic = require('serve-static')
+const  finalhandler = require('finalhandler')
+
+const serve = serveStatic(path.join(__dirname, 'public'))
+
+const app = http.createServer()
+
+app.on('request', (req, res) => {
+  serve(req, res, finalhandler)
+})
+
+app.listen(3001, () => {
+  console.log('http://localhost:3001')
+})
+```
