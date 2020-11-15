@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canvas学习</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      cursor: none;
+      background: black;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    var canvas = document.getElementById('canvas');
+    
+    var WIDTH = document.documentElement.clientWidth
+    var HEIGHT = document.documentElement.clientHeight
+    canvas.width = WIDTH
+    canvas.height = WIDTH
+    var content = canvas.getContext('2d');
+    var initRoundPopulation = 100
+    var round = []
+    function Round_item(index, x, y) {
+      this.index = index
+      this.x = x
+      this.y = y
+      this.r = Math.random() * 2 + 1 // 半径在[1, 3)
+      var alpha = (Math.floor(Math.random() * 10) + 1) / 10 / 2 // 透明度在[0.05~0.55)
+      this.color = 'rgba(255, 255, 255, ' + alpha + ')'
+    }
+    Round_item.prototype.draw = function () {
+      content.fillStyle = this.color
+      content.shadowBlur = this.r * 2
+      content.beginPath()
+      content.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false)
+      content.closePath()
+      content.fill()
+    }
+    Round_item.prototype.move = function () {
+      this.y -= 0.15
+      if (this.y < -10) {
+        this.y = HEIGHT + 10
+      }
+      this.draw()
+    }
+
+    function animate() {
+      content.clearRect(0, 0, WIDTH, HEIGHT)
+
+      for (var i of round) {
+        i.move()
+      }
+      requestAnimationFrame(animate)
+    }
+
+    function init() {
+      for (var i = 0; i < initRoundPopulation; i++) {
+        round[i] = new Round_item(i, WIDTH * Math.random(), HEIGHT * Math.random())
+        round[i].draw()
+      }
+      animate()
+    }
+
+    init()
+  </script>
+
+</body>
+</html>

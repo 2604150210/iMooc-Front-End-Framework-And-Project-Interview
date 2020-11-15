@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>时钟</title>
+  <style>
+    body {
+      background-color: #eee;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="clock"></canvas>
+  <script>
+    const clock = document.getElementById('clock')
+    const context = clock.getContext('2d')
+    clock.width = 400
+    clock.height = 400
+    draw()
+    function draw() {
+      context.clearRect(0, 0, 400, 400)
+      drawDial() // 表盘
+      drawHands() // 表针
+      requestAnimationFrame(draw)
+    }
+
+    // 表盘
+    function drawDial() {
+      context.save()
+      context.translate(200, 200) // 坐标原点移动到最中间
+      context.beginPath()
+      context.strokeStyle = '#333'
+      context.lineWidth= 3
+      context.arc(0, 0, 198, 0, 2 * Math.PI, false) // 表盘的圈
+      context.closePath()
+      context.stroke()
+      // 循环绘制60个格子
+      for (let i = 0; i < 60; i++) {
+        const angle = - Math.PI / 2 + i * 2 * Math.PI / 60 // 从 -pi/2 作为起始角度，然后旋转 i * pi/30 度
+        context.save()
+        context.rotate(angle)
+        let start
+        let end = 190
+        let strokeStyle
+        let lineWidth
+        if (i % 5 == 0) { // 整点刻度
+          start = 170
+          strokeStyle = '#333'
+          lineWidth = 3
+
+          // 绘制数字
+          context.save()
+          context.translate(start - 16, 0)
+          context.rotate(-angle)
+          context.font = "16px sans-serif"
+          context.textBaseline = 'middle'
+          let text = i === 0 ? 12 : i / 5
+          context.fillText(text, 0, 0)
+          context.restore()
+        } else {
+          start = 180
+          strokeStyle = '#999'
+          lineWidth = 2
+        }
+        context.beginPath()
+        context.strokeStyle = strokeStyle
+        context.lineWidth = lineWidth
+        context.moveTo(start, 0)
+        context.lineTo(end, 0)
+        context.closePath()
+        context.stroke()
+        context.restore()
+      }
+      context.restore()
+    }
+
+    // 表针: 时 分 秒
+    function drawHands() {
+      const time = new Date()
+      const hour = time.getHours()
+      const minute = time.getMinutes()
+      const second = time.getSeconds()
+      // const mill = time.getMilliseconds() // 开启秒钟匀速模式
+      const hourAngle = - Math.PI / 2 + (hour + minute / 60) * Math.PI / 30
+      const minuteAngle = - Math.PI / 2 + (minute + minute / 60) * Math.PI / 30
+      const secondAngle = - Math.PI / 2 + second * Math.PI / 30
+      // const secondAngle = - Math.PI / 2 + (second + mill / 1000) * Math.PI / 30 // 开启秒钟匀速模式
+      drawEveryHand(hourAngle, 70, 10, 'red')
+      drawEveryHand(minuteAngle, 100, 5, 'orange')
+      drawEveryHand(secondAngle, 130, 3, 'purple')
+    }
+    function drawEveryHand(angle, len, width, color) {
+      context.save()
+      context.translate(200, 200)
+      context.rotate(angle)
+      context.beginPath()
+      context.strokeStyle = color
+      context.lineWidth = width
+      context.lineCap = 'round'
+      context.moveTo(-5, 0)
+      context.lineTo(len, 0)
+      context.stroke()
+      context.restore()
+    }
+  </script>
+</body>
+</html>
